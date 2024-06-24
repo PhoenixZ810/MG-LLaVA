@@ -1,0 +1,4 @@
+pytorchvideo
+decord
+fairscale
+open_clip

@@ -1,0 +1,5 @@
+pytorchvideo
+decord
+fairscale
+open-clip-torch
+openai
