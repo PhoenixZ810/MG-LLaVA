@@ -12,7 +12,7 @@
 
 ## 🎉 News
 
-- **\[2024/06\]** Our paper is released in [Arxiv](?). The checkpoints will be released soon.
+- **\[2024/06\]** Our [Paper](https://arxiv.org/abs/2406.17770) and code are released. The checkpoints will be released soon.
 
 ## 📖 Introduction
 
