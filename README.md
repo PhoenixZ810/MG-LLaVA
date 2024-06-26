@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="images/MG.png" alt="Your Image" width="35px" style="float: left; margin-right: 10px;"/>
+  <img src="images/MG.png" alt="Your Image" width="35px" style="float: left; margin-right: 1px;"/>
 </div>
 
 # MG-LLaVA: Towards Multi-Granularity Visual Instruction Tuning
