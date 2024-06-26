@@ -24,7 +24,7 @@
 
 ## 🎉 News
 
-- **\[2024/06\]** Our [Paper](https://arxiv.org/abs/2406.17770) and code are released. The checkpoints will be released soon.
+- **\[2024/06\]** Our [Paper](https://arxiv.org/abs/2406.17770), code and [weights](https://huggingface.co/PhoenixZ/MG-LLaVA) are all released.
 
 ## 📖 Introduction
 
