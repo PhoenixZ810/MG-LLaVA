@@ -24,7 +24,7 @@
 
 ## 🎉 News
 
-- **\[2024/06\]** Our [Paper](https://arxiv.org/abs/2406.17770), code and [weights](https://huggingface.co/PhoenixZ/MG-LLaVA) are all released.
+- **\[2024/06\]** Our [paper](https://arxiv.org/abs/2406.17770), [code](https://github.com/PhoenixZ810/MG-LLaVA) and [weights](https://huggingface.co/PhoenixZ/MG-LLaVA) are all released.
 
 ## 📖 Introduction
 
