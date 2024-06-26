@@ -12,7 +12,7 @@
 
 ## 🎉 News
 
-- **\[2024/06\]** Paper and code are to be released!
+- **\[2024/06\]** Our paper is released in [Arxiv](?). The checkpoints will be released soon.
 
 ## 📖 Introduction
 
@@ -28,15 +28,95 @@ MG-LLaVA demonstrates exceptional perception skills.
   <img src="images/Main-results1.png" width="60%">
 </div>
 
-## 🖊️ Citation
-If you find this work useful, please consider citing:
-```bibtex
-@article{mgllava,
-  title={Towards Semantic Equivalence of Tokenization in Multimodal LLM},
-  author={Zhao, Xiangyu and Li, Xiangtai and Duan, Haodong and Huang, Haian and Li, Yining and Chen, Kai and Yang, Hua},
-  journal={arXiv preprint},
-  year={2024}
-}
+
+## 🛠️ Quick Start
+
+### Installation
+
+- It is recommended to build a Python-3.10 virtual environment using conda
+
+  ```bash
+  conda create --name mgllava-env python=3.10 -y
+  conda activate mgllava-env
+  ```
+
+- Install XTuner from source
+
+  ```shell
+  git clone https://github.com/PhoenixZ810/MG-LLaVA.git
+  cd MG-LLaVA
+  pip install -e '.[all]'
+  ```
+
+### Data Preparation
+
+Please refer to [dataset_prepare.md](dataset_prepare.md).
+
+### Before Train
+MG-LLaVA employed several LLMs ranged from 3.8B to 34B, including Phi-3-3.8B, Vicuna1.5-7B, Vicuna1.5-13B, llama3-8B, and Yi1.5-34B. We employ CLIP-Large-336m and CLIP-ConvNext-320-d as vision encoders, you should download both the LLM and CLIP checkpoints before training.
+
+The training process is similar to the original XTuner. Before training, you should check the [configs](mg_llava/config) and modify the following variables to your own settings. You can also modify the [configs](mg_llava/config) to train the model with your own settings.
+  ```shell
+  # Path of LLM and CLIP
+  llm_name_or_path
+  visual_encoder_name_or_path
+  visual_encoder_aux_path
+  prompt_template
+
+  # Data
+  data_path
+  box_json_path
+  image_folder
+  offline_processed_text_folder(optional)
+
+  # Training
+  pretrained_pth(Fine-Tuning)
+  ```
+Before training, you can use the following command to preprocess the text data to speed up the training process. You can preprocess the text data by running the following command:
+
+```shell
+python xtuner/tools/process_untokenized_llava_data.py CONFIG --save-folder TEXT-PATH
 ```
+and then set the `offline_processed_text_folder` in the config file to `TEXT-PATH`.
+
+### Train
+MG-LLaVA follows a two-stage training process, the entire training process takes approximately 23 hours when using the Vicuna1.5-7B model using 8×A100 GPUs. For example, to train the MG-LLaVA model with Vicuna1.5-7B, you can use the following command:
+
+
+- **Entire Pipeline**: Pretraining + Fine-tuning + Evaluation
+
+  ```shell
+  bash script/train_vicuna7B.sh
+  ```
+
+If you want to train our model step by step, you can follow the instructions below:
+
+- **Step 1**, start pretraining.
+  ```shell
+  bash script/train_pretrain.sh mg_llava/config/vicuna/fuse_vicuna7b_clip_L_14_336_pretrain_padding.py
+  ```
+
+- **Step 2**, start fine-tuning.
+
+  ```shell
+  bash script/train_sft.sh mg_llava/config/vicuna/fuse_vicuna7b_clip_L_14_336_sft_padding.py
+  ```
+
+  - `--deepspeed` means using [DeepSpeed](https://github.com/microsoft/DeepSpeed) 🚀 to optimize the training. XTuner comes with several integrated strategies including ZeRO-1, ZeRO-2, and ZeRO-3. If you wish to disable this feature, simply remove this argument.
+
+  - For more examples, please see [finetune.md](./docs/en/user_guides/finetune.md).
+
+- **Step 3**, evaluation. Before evaluation, you should modify the [test config]() and run the following command:
+  ```shell
+  bash script/test.sh
+  ```
+  You can convert the saved PTH model (if using DeepSpeed, it will be a directory) to Hugging Face model, by
+
+  ```shell
+  xtuner convert pth_to_hf CONFIG_NAME_OR_PATH CHECKPOINT SAVE_PATH
+  ```
+
+## Model Weights
+Our checkpoints are available at [ModelZoo](https://huggingface.co/PhoenixZ/MG-LLaVA).
 
 
