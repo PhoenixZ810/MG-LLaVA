@@ -6,6 +6,18 @@
 
  Xiangyu Zhao, [Xiangtai Li](https://hliu.cc), [Haodong Duan](https://sivakm.github.io/), [Haian Huang](https://gregmeyer.info), [Yining Li](https://scholar.google.com/citations?user=i7U4YogAAAAJ&hl=en), [Kai Chen](https://scholar.google.com/citations?user=_UJsz3AAAAAJ&hl=en), Hua Yang
 
+  <p align="center">
+    <a href='https://arxiv.org/abs/2406.17770'>
+      <img src='https://img.shields.io/badge/Paper-PDF-green?style=flat&logo=arXiv&logoColor=green' alt='arXiv PDF'>
+    </a>
+    <a href='https://phoenixz810.github.io/MGLLaVA/'>
+      <img src='https://img.shields.io/badge/Project-Page-blue?style=flat&logo=webpack' alt='Project Page'>
+    </a>
+    <a href='https://github.com/PhoenixZ810/MG-LLaVA'>
+      <img src='https://img.shields.io/badge/Video-YouTube-red?style=flat&logo=YouTube' alt='Video'>
+    </a>
+  </p>
+<br />
 <div align="center">
   <img src="images/teaser.png" width="90%">
 </div>
