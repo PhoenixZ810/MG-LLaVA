@@ -13,7 +13,7 @@
     <a href='https://phoenixz810.github.io/MGLLaVA/'>
       <img src='https://img.shields.io/badge/Project-Page-blue?style=flat&logo=webpack' alt='Project Page'>
     </a>
-    <a href='https://github.com/PhoenixZ810/MG-LLaVA'>
+    <a href='https://www.youtube.com/watch?v=WI-65Jk0j50'>
       <img src='https://img.shields.io/badge/Video-YouTube-red?style=flat&logo=YouTube' alt='Video'>
     </a>
   </p>
