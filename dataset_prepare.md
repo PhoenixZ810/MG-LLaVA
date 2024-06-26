@@ -70,7 +70,7 @@ MG-LLAVA
 ```
 
 ## Download Annotations Files
-We employ RAM-Plus and OWL-ViT to generate bounding boxes for training and evaluation. Our trainging annotation files and bounding box annotation files are available in [Hugging Face](https://huggingface.co/PhoenixZ/MG-LLaVA). Please download and modify ```box_json_path``` in your config file.
+We employ RAM-Plus and OWL-ViT to generate bounding boxes for training and evaluation. Our [trainging annotation files](https://huggingface.co/PhoenixZ/MG-LLaVA/tree/main/train_json) and [bounding box annotation files](https://huggingface.co/PhoenixZ/MG-LLaVA/tree/main/bbox_json/train) are available in Hugging Face. Please download and modify ```data_path``` and ```box_json_path``` in your config file.
 
 If you want to generate the bounding boxes by yourself, you can refer to the [image_offline_to_bbox.py](mg_llava/bbox_generation/image_offline_to_bbox.py) by downloading [RAM](https://huggingface.co/xinyu1205/recognize-anything-plus-model/blob/main/ram_plus_swin_large_14m.pth), [OWL-ViT2](https://huggingface.co/google/owlv2-large-patch14-ensemble) and  modifying the ```data_file```, ```image_folder```, ```save_json_path``` ,then run the following command:
 ```shell
@@ -80,4 +80,4 @@ torchrun --nproc_per_node=8 mg_llava/bbox_generation/image_offline_to_bbox.py
 ## Download Data for Evaluation
 Most of the evaluation benchmarks utilized in our paper can be found in [LLaVa](https://github.com/haotian-liu/LLaVA/blob/main/docs/Evaluation.md).
 
-The bounding box annotation files for evaluation are available in [Hugging Face](https://huggingface.co/PhoenixZ/MG-LLaVA).
+The bounding box annotation files for evaluation are available in [Hugging Face](https://huggingface.co/PhoenixZ/MG-LLaVA/tree/main/bbox_json/eval).

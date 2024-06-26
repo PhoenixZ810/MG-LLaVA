@@ -32,7 +32,7 @@ visual_encoder_aux_path = 'PATH_TO_CLIP-ConvNext-MODEL'
 # Data
 data_path = 'PATH_TO_PERTRAIN_JSON'
 offline_processed_text_folder = None # 'PATH_TO_OFFLINE_FOLDER'
-image_folder = 'data/mix'
+image_folder = 'data'
 prompt_template = PROMPT_TEMPLATE.qwen_chat
 max_length = int(2048 - (336 // 14) ** 2)
 image_size_aux = 768
