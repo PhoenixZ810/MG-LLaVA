@@ -65,7 +65,7 @@ MG-LLaVA demonstrates exceptional perception skills.
 Please refer to [dataset_prepare.md](dataset_prepare.md).
 
 ### Before Train
-MG-LLaVA employed several LLMs ranged from 3.8B to 34B, including Phi-3-3.8B, Vicuna1.5-7B, Vicuna1.5-13B, llama3-8B, and Yi1.5-34B. We employ CLIP-Large-336m and CLIP-ConvNext-320-d as vision encoders, you should download both the LLM and CLIP checkpoints before training.
+MG-LLaVA employed several LLMs ranged from 3.8B to 34B, including [Phi-3-3.8B](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct), [Vicuna1.5-7B](https://huggingface.co/lmsys/vicuna-7b-v1.5), [Vicuna1.5-13B](https://huggingface.co/lmsys/vicuna-13b-v1.5), [llama3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct), and [Yi1.5-34B](https://huggingface.co/01-ai/Yi-1.5-34B-Chat). We employ [CLIP-Large-336](https://huggingface.co/openai/clip-vit-large-patch14-336) and [CLIP-ConvNext-320-d](https://huggingface.co/laion/CLIP-convnext_large_d_320.laion2B-s29B-b131K-ft-soup) as vision encoders, you should download both the LLM and CLIP checkpoints before training.
 
 The training process is similar to the original XTuner. Before training, you should check the [configs](mg_llava/config) and modify the following variables to your own settings. You can also modify the [configs](mg_llava/config) to train the model with your own settings.
   ```shell
