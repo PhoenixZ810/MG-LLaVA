@@ -1,3 +1,0 @@
-from .qformer_proxy_eval_dataset import QFormerObjectLLaVAProxyEvalDataset
-from .llvid_proxy_eval_dataset import llvidObjectLLaVAProxyEvalDataset
-__all__ = ['QFormerObjectLLaVAProxyEvalDataset', 'llvidObjectLLaVAProxyEvalDataset']
