@@ -4,7 +4,7 @@
 
 # MG-LLaVA: Towards Multi-Granularity Visual Instruction Tuning
 
- Xiangyu Zhao, [Xiangtai Li](https://hliu.cc), [Haodong Duan](https://sivakm.github.io/), [Haian Huang](https://gregmeyer.info), [Yining Li](https://scholar.google.com/citations?user=i7U4YogAAAAJ&hl=en), [Kai Chen](https://scholar.google.com/citations?user=_UJsz3AAAAAJ&hl=en), Hua Yang
+ Xiangyu Zhao, [Xiangtai Li](https://lxtgh.github.io), [Haodong Duan](https://kennymckormick.github.io/), [Haian Huang](https://github.com/hhaAndroid), [Yining Li](https://scholar.google.com.hk/citations?user=y_cp1sUAAAAJ&hl=en), [Kai Chen](https://scholar.google.com.hk/citations?user=eGD0b7IAAAAJ&hl=en), Hua Yang
 
   <p align="center">
     <a href='https://arxiv.org/abs/2406.17770'>
