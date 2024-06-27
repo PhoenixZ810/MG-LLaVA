@@ -118,7 +118,7 @@ If you want to train our model step by step, you can follow the instructions bel
 
   - For more examples, please see [finetune.md](./docs/en/user_guides/finetune.md).
 
-- **Step 3**, evaluation. Before evaluation, you should modify the [test config]() and run the following command:
+- **Step 3**, evaluation. Before evaluation, you should modify the [test config](). Then run the following command:
   ```shell
   bash script/test.sh
   ```

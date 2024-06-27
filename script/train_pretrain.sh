@@ -14,7 +14,7 @@ srun -p PARTITION_NAME \
     --cpus-per-task=${CPUS_PER_TASK} \
     --kill-on-bad-exit=1 \
     python xtuner/tools/train.py \
-    PATH_TO_CONFIG \
+    ${CONFIG} \
     --seed 2024 \
     --launcher="slurm" \
     --deepspeed deepspeed_zero2
