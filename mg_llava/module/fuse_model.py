@@ -107,14 +107,6 @@ class MultiFuseObjectLLaVAModel(BoxLLaVAModel):
             pretrained_state_dict = guess_load_checkpoint(pretrained_pth)
             self.load_state_dict(pretrained_state_dict, strict=False)
             print(f'Load pretrained weight from {pretrained_pth}')
-        # if sampler_query_num:
-        #     self.use_sampler = True
-        #     self.resampler = Resampler(
-        #         grid_size=sampler_query_num,
-        #         embed_dim=5120,  # 保持与视觉模型输出的 embed_dim 一致
-        #         num_heads=1024 // 128,  # 保持与视觉模型输出的 num_heads 一致
-        #         kv_dim=1024,  # 保持与视觉模型输出的 kv_dim 一致
-        #     )
 
     def state_dict(self, *args, **kwargs):
         state_dict = BaseModel.state_dict(self, *args, **kwargs)
@@ -189,8 +181,7 @@ class MultiFuseObjectLLaVAModel(BoxLLaVAModel):
             else:
                 data['pixel_values'] = pixel_values
 
-            # 基于 bbox + roialign 提取 visual_outputs 特征
-            # TODO 先每张图片单独处理，后面考虑并行
+            # extract RoI visual feature
             bbox_visual_outputs = []
             for i, (boxes, labels) in enumerate(zip(data['gt_boxes'], data['gt_labels'])):
                 # 1,c,h,w -> n,c,7,7
@@ -235,7 +226,7 @@ class MultiFuseObjectLLaVAModel(BoxLLaVAModel):
             out_box_feat = multi_level_feat.sum(0)
 
             out_box_feat = out_box_feat.to(pixel_values.dtype)
-            # 通过 avg pool 变成维度为 1 的序列 -> n,c -> 1,n,c
+            # Average Pooling -> n,c -> 1,n,c
             out_box_feat = out_box_feat.mean(dim=(2, 3)).reshape(
                 1, out_box_feat.shape[0], out_box_feat.shape[1]
             )
@@ -254,44 +245,12 @@ class MultiFuseObjectLLaVAModel(BoxLLaVAModel):
                 print(boxes.dtype)
                 raise
             out_box_feat = out_box_feat.to(pixel_values.dtype)
-            # 通过 avg pool 变成维度为 1 的序列 -> n,c -> 1,n,c
+            # Average Pooling -> n,c -> 1,n,c
             out_box_feat = out_box_feat.mean(dim=(2, 3)).reshape(
                 1, out_box_feat.shape[0], out_box_feat.shape[1]
             )
             # 1，n，c -> n，c'
             out_box_feat = self.bbox_projector(out_box_feat)[0]
-            # if multi_level:
-            #     channels = 0
-            #     multi_level_feat = visual_outputs_aux.new_zeros(
-            #         len(multi_level),visual_outputs_aux.shape[0], 1024, 192, 192
-            #     )
-            #     for level, channels_loc in enumerate(multi_level):
-            #         level_feature = visual_outputs_aux[:, channels : channels + channels_loc, :, :]
-            #         channels = channels + channels_loc
-            #         linear_loc = self.multi_level_linear[level].to(
-            #             device=level_feature.device, dtype=level_feature.dtype
-            #         )
-            #         out_feat = linear_loc(level_feature.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
-            #         multi_level_feat[level] = out_feat
-
-            #     out_feat_sum = multi_level_feat.sum(0)
-
-            #     visual_outputs_aux = out_feat_sum.float()
-
-            # bbox_visual_outputs = []
-            # for i, (boxes, labels) in enumerate(zip(data['gt_boxes'], data['gt_labels'])):
-            #     # 1,c,h,w -> n,c,7,7
-            #     out_box_feat = roi_align(
-            #         visual_outputs_aux[i : i + 1], [boxes], output_size=56, spatial_scale=192 / 768
-            #     )
-            #     out_box_feat = out_box_feat.to(pixel_values.dtype)
-            #     # 通过 avg pool 变成维度为 1 的序列 -> n,c -> 1,n,c
-            #     out_box_feat = out_box_feat.mean(dim=(2, 3)).reshape(
-            #         1, out_box_feat.shape[0], out_box_feat.shape[1]
-            #     )
-            #     # 1，n，c -> n，c'
-            #     out_box_feat = self.bbox_projector(out_box_feat)[0]
-            #     bbox_visual_outputs.append(out_box_feat)
         return out_box_feat
 
     def preparing_for_generation(self, metainfo: dict = None):
@@ -372,7 +331,7 @@ def prepare_inputs_labels_for_multimodal(
             cur_image_idx += 1
 
             # =============================================
-            # 在 image embedding 后面加入 bbox embedding
+            # concat image embedding & bbox embedding
             cur_bbox_feats = bbox_feats[batch_idx]
             new_inputs_embeds.append(cur_bbox_feats[0:0])
             new_labels.append(
@@ -417,7 +376,7 @@ def prepare_inputs_labels_for_multimodal(
                     )
 
                     # =============================================
-                    # 在 image embedding 后面加入 bbox embedding
+                    # concat image embedding & bbox embedding
                     cur_bbox_feats = bbox_feats[batch_idx]  # n,c
                     cur_new_inputs_embeds.append(cur_bbox_feats)
                     cur_new_labels.append(
@@ -447,7 +406,7 @@ def prepare_inputs_labels_for_multimodal(
                         )
 
                         # =============================================
-                        # 在 image embedding 后面加入 bbox embedding
+                        # concat image embedding & bbox embedding
                         cur_bbox_feats = bbox_feats[batch_idx][j]  # n,c
                         cur_new_inputs_embeds.append(cur_bbox_feats)
                         cur_new_labels.append(
@@ -661,4 +620,3 @@ class DualPathFuseModule3(nn.Module):
         high_res_feat = high_res_feat.view(b, c, -1).transpose(1, 2)
         low_res_feat = torch.cat((low_res_feat, high_res_feat), dim=-1)
         return low_res_feat
-

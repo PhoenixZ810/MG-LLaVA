@@ -24,7 +24,7 @@ def get_rank_and_world_size():
     return local_rank, world_size
 
 
-# 预训练数据
+# pretrain data
 data_file = 'PATH_TO_ANNOTATION_FILE'
 image_folder = 'PATH_TO_IMAGE_FOLDER'
 save_json_path = 'FILE_TO_SAVE_RESULT'

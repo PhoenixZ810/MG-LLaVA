@@ -68,7 +68,7 @@ def prepare_inputs_labels_for_multimodal(
             cur_image_idx += 1
 
             # =============================================
-            # 在 image embedding 后面加入 bbox embedding
+            # concat image embedding & bbox embedding
             cur_bbox_feats = bbox_feats[batch_idx]
             new_inputs_embeds.append(cur_bbox_feats[0:0])
             new_labels.append(
@@ -113,7 +113,7 @@ def prepare_inputs_labels_for_multimodal(
                                dtype=cur_labels.dtype))
 
                 # =============================================
-                # 在 image embedding 后面加入 bbox embedding
+                # concat image embedding & bbox embedding
                 cur_bbox_feats = bbox_feats[batch_idx]  # n,c
                 cur_new_inputs_embeds.append(cur_bbox_feats)
                 cur_new_labels.append(
@@ -244,16 +244,16 @@ class BoxLLaVAModel(LLaVAModel):
             pixel_values = self.projector(visual_outputs)
             data['pixel_values'] = pixel_values
 
-            # 基于 bbox + roialign 提取 visual_outputs 特征
+            # extract RoI visual feature
             visual_outputs = visual_outputs.reshape(visual_outputs.shape[0], 27, 27, -1)
             visual_outputs = visual_outputs.permute((0, 3, 1, 2)).float()
-            # TODO 先每张图片单独处理，后面考虑并行
+
             bbox_visual_outputs = []
             for i, (boxes, labels) in enumerate(zip(data['gt_boxes'], data['gt_labels'])):
                 # 1,c,h,w -> n,c,7,7
                 out_box_feat = roi_align(visual_outputs[i:i + 1], [boxes], output_size=7, spatial_scale=27 / 384)
                 out_box_feat = out_box_feat.to(pixel_values.dtype)
-                # 通过 avg pool 变成维度为 1 的序列 -> n,c -> 1,n,c
+                # Average Pooling -> n,c -> 1,n,c
                 out_box_feat = out_box_feat.mean(dim=(2, 3)).reshape(1, out_box_feat.shape[0], out_box_feat.shape[1])
                 # 1，n，c -> n，c'
                 out_box_feat = self.bbox_projector(out_box_feat)[0]

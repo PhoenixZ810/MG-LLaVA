@@ -730,15 +730,8 @@ def adjust_padding_boxes(boxes, height, width):
 
 
 def adjust_short_resize_coordinates(original_boxes, original_height, original_width, new_short_edge_length):
-    # 计算缩放比例
     scale = new_short_edge_length / min(original_width, original_height)
 
-    # 调整bounding box坐标
-    # x_min, y_min, x_max, y_max = box
-    # new_x_min = int(x_min * scale)
-    # new_y_min = int(y_min * scale)
-    # new_x_max = int(x_max * scale)
-    # new_y_max = int(y_max * scale)
     boxes = original_boxes * scale
     boxes = torch.round(boxes).int()
     new_h = int(original_height * scale)
@@ -747,15 +740,12 @@ def adjust_short_resize_coordinates(original_boxes, original_height, original_wi
 
 
 def adjust_center_crop_box(original_boxes, original_labels, original_height, original_width, crop_size):
-    # 裁剪尺寸
     crop_height = crop_size
     crop_width = crop_size
 
-    # 计算裁剪的起始点
     start_x = (original_width - crop_width) // 2
     start_y = (original_height - crop_height) // 2
 
-    # 调整box坐标
     new_boxes = []
     new_labels = []
     for i in range(original_boxes.size(0)):
@@ -769,7 +759,7 @@ def adjust_center_crop_box(original_boxes, original_labels, original_height, ori
             continue
         new_boxes.append(torch.tensor([new_x_min, new_y_min, new_x_max, new_y_max]))
         new_labels.append(original_labels[i])
-    # 返回调整后的box坐标
+
     if new_boxes:
         stacked_boxes = torch.stack(new_boxes).float()
     else:

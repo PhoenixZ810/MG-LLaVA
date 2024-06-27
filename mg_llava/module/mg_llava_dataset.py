@@ -148,8 +148,7 @@ class MGLLaVADataset(LLaVADataset):
                     else:
                         raise
 
-            # TODO: 如果有裁剪或者 padding 操作，则本代码有问题
-            # 坐标是原图尺度的，要映射到resize后的尺度
+            # resize coordinates
             if self.is_clip:
                 boxes, h1, w1 = adjust_short_resize_coordinates(boxes, old_h, old_w, self.image_size_aux)
                 boxes, labels = adjust_center_crop_box(boxes, labels, h1, w1, self.image_size_aux)
@@ -288,7 +287,7 @@ class MGLLaVADataset(LLaVADataset):
                     else:
                         raise
 
-                # 坐标是原图尺度的，要映射到resize后的尺度
+                # resize coordinates
                 boxes, h1, w1 = adjust_short_resize_coordinates(boxes, old_h, old_w, self.image_size_aux)
                 boxes, labels = adjust_center_crop_box(boxes, labels, h1, w1, self.image_size_aux)
 
@@ -300,7 +299,7 @@ class MGLLaVADataset(LLaVADataset):
         else:
             data_dict['pixel_values'] = torch.zeros(3, self.crop_size_raw['height'], self.crop_size_raw['width'])
             data_dict['pixel_values_aux'] = torch.zeros(3, self.image_size_aux, self.image_size_aux)
-            # 100 无所谓
+            # 100
             data_dict['gt_boxes'] = torch.tensor([0, 0, 100, 100]).reshape(1, 4).float()
             data_dict['gt_labels'] = torch.tensor([0]).reshape(1)
             data_dict['id'] = ''

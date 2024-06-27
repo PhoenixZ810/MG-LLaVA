@@ -396,8 +396,7 @@ class ChatObjectLLaVAProxyEvalDataset:
                     boxes = boxes[top_indices]
                     labels = [labels[i] for i in top_indices.tolist()]
 
-        # TODO: 如果有裁剪或者 padding 操作，则本代码有问题
-        # 坐标是原图尺度的，要映射到resize后的尺度
+        # resize coordinates
         if self.is_clip:
             boxes, h1, w1 = adjust_short_resize_coordinates(boxes, old_h, old_w, self.image_size_aux)
             boxes, labels = adjust_center_crop_box(boxes, labels, h1, w1, self.image_size_aux)
