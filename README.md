@@ -91,7 +91,7 @@ python xtuner/tools/process_untokenized_llava_data.py CONFIG --save-folder TEXT-
 ```
 and then set the `offline_processed_text_folder` in the config file to `TEXT-PATH`.
 
-### Train
+### Train & Evaluation
 MG-LLaVA follows a two-stage training process, the entire training process takes approximately 23 hours when using the Vicuna1.5-7B model using 8×A100 GPUs. For example, to train the MG-LLaVA model with Vicuna1.5-7B, you can use the following command:
 
 
@@ -118,7 +118,114 @@ If you want to train our model step by step, you can follow the instructions bel
 
   - For more examples, please see [finetune.md](./docs/en/user_guides/finetune.md).
 
-- **Step 3**, evaluation. Before evaluation, you should modify the [test config](script/test.sh). Then run the following command:
+- **Step 3**, evaluation. The evaluation metrics are specified in the sft configuration, including MMBench, SEED, SQA, AI2D, TextVQA, POPE, GQA, VQAv2, and additional ones. For example, in the [Vicuna7B-sft config](mg_llava/config/vicuna/fuse_more_vicuna7b_clip_L_14_336_sft_padding.py):
+
+  ```
+  test_dataset = [
+      dict(
+          type=MultipleChoiceDataset,
+          proxy_eval_dataset=dict(
+              type=MGLLaVAProxyEvalDataset,
+              box_json_path='PATH_TO_MMB-TEST_BBOX_JSON',
+              image_size_aux=image_size_aux,
+              limit_num=limit_num,
+          ),
+          data_file='PATH_TO_MMB-DEV_TSV',
+          prompt_template=PROMPT_TEMPLATE.vicuna,
+          tokenizer=tokenizer,
+          image_processor=image_processor,
+          pad_image_to_square=pad_image_to_square,
+      ),
+      dict(
+          type=TextVQADataset,
+          proxy_eval_dataset=dict(
+              type=MGLLaVAProxyEvalDataset,
+              box_json_path='PATH_TO_TEXTVQA-VAL_BBOX_JSON',
+              image_size_aux=image_size_aux,
+              limit_num=limit_num,
+          ),
+          data_file='textvqa/llava_textvqa_val_v051_ocr.jsonl',
+          ann_file='text_vqa/TextVQA_0.5.1_val.json',
+          image_folder='text_vqa/train_images',
+          prompt_template=PROMPT_TEMPLATE.vicuna,
+          tokenizer=tokenizer,
+          image_processor=image_processor,
+          pad_image_to_square=pad_image_to_square,
+      ),
+      dict(
+          type=MMEDataset,
+          proxy_eval_dataset=dict(
+              type=MGLLaVAProxyEvalDataset,
+              box_json_path='PATH_TO_MME_BBOX_JSON',
+              image_size_aux=image_size_aux,
+              limit_num=limit_num,
+          ),
+          data_file='PATH_TO_MME_TSV',
+          image_folder='/mnt/petrelfs/share_data/duanhaodong/data/mme/MME_Benchmark_release',
+          prompt_template=PROMPT_TEMPLATE.vicuna,
+          tokenizer=tokenizer,
+          image_processor=image_processor,
+
+          pad_image_to_square=pad_image_to_square,
+      ),
+      dict(
+          type=POPEDataset,
+          proxy_eval_dataset=dict(
+              type=MGLLaVAProxyEvalDataset,
+              box_json_path='PATH_TO_COCO-POPE_BBOX_JSON',
+              image_size_aux=image_size_aux,
+              limit_num=limit_num,
+          ),
+          data_file=[
+              'POPE/coco_pope_adversarial.json',
+              'POPE/coco_pope_popular.json',
+              'POPE/coco_pope_random.json',
+          ],
+          coco_val_path='coco/val2014/',
+          prompt_template=PROMPT_TEMPLATE.vicuna,
+          tokenizer=tokenizer,
+          image_processor=image_processor,
+          pad_image_to_square=pad_image_to_square,
+      ),
+      dict(
+          type=GQADataset,
+          proxy_eval_dataset=dict(
+              type=MGLLaVAProxyEvalDataset,
+              box_json_path='PATH_TO_GQA_BBOX_JSON',
+              image_size_aux=image_size_aux,
+              limit_num=limit_num,
+          ),
+          question_file='gqa/llava_gqa_testdev_balanced.jsonl',
+          answer_file='llava_gqa_testdev_balanced_merge.jsonl', # file name of predicted answer
+          prediction_file='testdev_balanced_predictions.json', # file name of formatted predicted answer
+          test_question_file='gqa/testdev_balanced_questions.json',
+          image_folder='gqa/images',
+          prompt_template=PROMPT_TEMPLATE.vicuna,
+          tokenizer=tokenizer,
+          image_processor=image_processor,
+          pad_image_to_square=pad_image_to_square,
+      ),
+      dict(
+          type=VQAv2Dataset,
+          proxy_eval_dataset=dict(
+              type=MGLLaVAProxyEvalDataset,
+              box_json_path='PATH_TO_VQA_BBOX_JSON',
+              image_size_aux=image_size_aux,
+          ),
+          question_file='vqa/llava_vqav2_mscoco_test-dev2015.jsonl',
+          answer_file='llava_vqav2_testdev_balanced_merge.jsonl', # file name of predicted answer
+          test_file='vqa/llava_vqav2_mscoco_test2015.jsonl',
+          prediction_file='vqav2_testdev_balanced_predictions.json', # file name of formatted predicted answer
+          image_folder='vqa/vqav2_test2015',
+          prompt_template=PROMPT_TEMPLATE.vicuna,
+          tokenizer=tokenizer,
+          image_processor=image_processor,
+          pad_image_to_square=pad_image_to_square,
+      ),
+  ]
+  ```
+
+Before evaluation, you should modify the [test config](script/test.sh). Then run the following command:
   ```shell
   bash script/test.sh
   ```
