@@ -238,4 +238,16 @@ Before evaluation, you should modify the [test config](script/test.sh). Then run
 ## Model Weights
 Our checkpoints are available at [ModelZoo](https://huggingface.co/PhoenixZ/MG-LLaVA).
 
+## Citation
+If you find MG-LLaVA useful, please cite using this BibTeX:
+```
+@article{zhao2024mg,
+  title={MG-LLaVA: Towards Multi-Granularity Visual Instruction Tuning},
+  author={Zhao, Xiangyu and Li, Xiangtai and Duan, Haodong and Huang, Haian and Li, Yining and Chen, Kai and Yang, Hua},
+  journal={arXiv preprint arXiv:2406.17770},
+  year={2024}
+}
+```
+
+
 
