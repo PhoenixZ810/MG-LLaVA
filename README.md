@@ -240,7 +240,7 @@ Our checkpoints are available at [ModelZoo](https://huggingface.co/PhoenixZ/MG-L
 
 ## Citation
 If you find MG-LLaVA useful, please cite using this BibTeX:
-```
+```bibtex
 @article{zhao2024mg,
   title={MG-LLaVA: Towards Multi-Granularity Visual Instruction Tuning},
   author={Zhao, Xiangyu and Li, Xiangtai and Duan, Haodong and Huang, Haian and Li, Yining and Chen, Kai and Yang, Hua},
@@ -248,6 +248,8 @@ If you find MG-LLaVA useful, please cite using this BibTeX:
   year={2024}
 }
 ```
-
+## Acknowledgement
+- [Xtuner](https://github.com/InternLM/xtuner): the codebase we built upon.
+- [LLaVA](https://github.com/haotian-liu/LLaVA): the base model structure.
 
 
