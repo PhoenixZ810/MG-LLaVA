@@ -23,7 +23,7 @@
 </div>
 
 ## 🎉 News
-- **\[2024/08\]** MG-LLaVA now supported the evalution of [MMVet](https://github.com/yuweihao/MM-Vet), [LLaVA-Bench-in-the-wild](https://github.com/haotian-liu/LLaVA/blob/main/docs/LLaVA_Bench.md), [MMVP](https://github.com/tsb0601/MMVP), and [MathVista](https://github.com/lupantech/MathVista) benchmarks! More details can be found in [eval.md](eval.md).
+- **\[2024/08\]** MG-LLaVA now supported the evalution of [MMVet](https://github.com/yuweihao/MM-Vet), [LLaVA-Bench-in-the-wild](https://github.com/haotian-liu/LLaVA/blob/main/docs/LLaVA_Bench.md), [MMVP](https://github.com/tsb0601/MMVP), and [MathVista](https://github.com/lupantech/MathVista) benchmarks! More details can be found in [evaluation.md](evaluation.md).
 - **\[2024/06\]** Our [paper](https://arxiv.org/abs/2406.17770), [code](https://github.com/PhoenixZ810/MG-LLaVA) and [weights](https://huggingface.co/PhoenixZ/MG-LLaVA) are all released.
 
 ## 📖 Introduction
@@ -38,6 +38,11 @@ MG-LLaVA demonstrates exceptional perception skills.
 ## 🔥 Main Results
 <div align="center">
   <img src="images/Main-results1.png" width="60%">
+</div>
+
+
+<div align="center">
+  <img src="images/More_result.png" width="90%">
 </div>
 
 
