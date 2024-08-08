@@ -7,6 +7,21 @@ from .gqa_dataset import GQADataset
 from .vqav2_dataset import VQAv2Dataset
 from .chartqa_dataset import ChartQADataset
 from .general_vqa_dataset import GeneralVQADataset
+from .vqa_dataset import VQADataset
+from .math_dataset import MathDataset
+from .mmvp_dataset import MMVPDataset
 
-__all__ = ['MMEDataset', 'MultipleChoiceDataset', 'POPEDataset', 'HallusionDataset', 'TextVQADataset', 'GQADataset',
-           'VQAv2Dataset', 'ChartQADataset', 'GeneralVQADataset']
+__all__ = [
+    'MMEDataset',
+    'MultipleChoiceDataset',
+    'POPEDataset',
+    'HallusionDataset',
+    'TextVQADataset',
+    'GQADataset',
+    'VQAv2Dataset',
+    'ChartQADataset',
+    'GeneralVQADataset',
+    'VQADataset',
+    'MathDataset',
+    'MMVPDataset',
+]

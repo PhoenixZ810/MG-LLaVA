@@ -23,6 +23,9 @@ from xtuner.dataset.evaluation import (
     HallusionDataset,
     TextVQADataset,
     GeneralVQADataset,
+    VQADataset,
+    MathDataset,
+    MMVPDataset,
 )
 from mg_llava.evaluation import MGLLaVAProxyEvalDataset, GQADataset, VQAv2Dataset
 from xtuner.dataset import ConcatDataset
@@ -429,7 +432,6 @@ test_dataset = [
         prompt_template=PROMPT_TEMPLATE.vicuna,
         tokenizer=tokenizer,
         image_processor=image_processor,
-
         pad_image_to_square=pad_image_to_square,
     ),
     dict(
@@ -488,8 +490,8 @@ test_dataset = [
             limit_num=limit_num,
         ),
         question_file='gqa/llava_gqa_testdev_balanced.jsonl',
-        answer_file='llava_gqa_testdev_balanced_merge.jsonl', # file name of predicted answer
-        prediction_file='testdev_balanced_predictions.json', # file name of formatted predicted answer
+        answer_file='llava_gqa_testdev_balanced_merge.jsonl',  # file name of predicted answer
+        prediction_file='testdev_balanced_predictions.json',  # file name of formatted predicted answer
         test_question_file='gqa/testdev_balanced_questions.json',
         image_folder='gqa/images',
         prompt_template=PROMPT_TEMPLATE.vicuna,
@@ -505,10 +507,71 @@ test_dataset = [
             image_size_aux=image_size_aux,
         ),
         question_file='vqa/llava_vqav2_mscoco_test-dev2015.jsonl',
-        answer_file='llava_vqav2_testdev_balanced_merge.jsonl', # file name of predicted answer
+        answer_file='llava_vqav2_testdev_balanced_merge.jsonl',  # file name of predicted answer
         test_file='vqa/llava_vqav2_mscoco_test2015.jsonl',
-        prediction_file='vqav2_testdev_balanced_predictions.json', # file name of formatted predicted answer
+        prediction_file='vqav2_testdev_balanced_predictions.json',  # file name of formatted predicted answer
         image_folder='vqa/vqav2_test2015',
+        prompt_template=PROMPT_TEMPLATE.vicuna,
+        tokenizer=tokenizer,
+        image_processor=image_processor,
+        pad_image_to_square=pad_image_to_square,
+    ),
+    dict(
+        type=VQADataset,
+        proxy_eval_dataset=dict(
+            type=MGLLaVAProxyEvalDataset,
+            box_json_path='PATH_TO_LLAVA_BENCH_IN_THE_WILD_BBOX_JSON',
+            image_size_aux=image_size_aux,
+        ),
+        data_file='llava-bench-in-the-wild/questions.jsonl',
+        answer_file='llava_w_prediction.jsonl',
+        image_folder='llava-bench-in-the-wild/images',
+        prompt_template=PROMPT_TEMPLATE.vicuna,
+        tokenizer=tokenizer,
+        image_processor=image_processor,
+        pad_image_to_square=pad_image_to_square,
+    ),
+    dict(
+        type=VQADataset,
+        proxy_eval_dataset=dict(
+            type=MGLLaVAProxyEvalDataset,
+            box_json_path='PATH_TO_MMVET_BBOX_JSON',
+            image_size_aux=image_size_aux,
+        ),
+        data_file='mm-vet/llava-mm-vet.jsonl',
+        answer_file='mmvet_prediction.jsonl',
+        prediction_file='mmvet_upload.json',
+        image_folder='mm-vet/images',
+        prompt_template=PROMPT_TEMPLATE.vicuna,
+        tokenizer=tokenizer,
+        image_processor=image_processor,
+        pad_image_to_square=pad_image_to_square,
+    ),
+    dict(
+        type=MathDataset,
+        proxy_eval_dataset=dict(
+            type=MGLLaVAProxyEvalDataset,
+            box_json_path='PATH_TO_MATHVISTA_BBOX_JSON',
+            image_size_aux=image_size_aux,
+        ),
+        data_file='MathVista/test_mini.json',
+        answer_file='mathvista_prediction.jsonl',
+        image_folder='MathVista/',
+        prompt_template=PROMPT_TEMPLATE.vicuna,
+        tokenizer=tokenizer,
+        image_processor=image_processor,
+        pad_image_to_square=pad_image_to_square,
+    ),
+    dict(
+        type=MMVPDataset,
+        proxy_eval_dataset=dict(
+            type=MGLLaVAProxyEvalDataset,
+            box_json_path='PATH_TO_MMVP_BBOX_JSON',
+            image_size_aux=image_size_aux,
+        ),
+        data_file='MMVP/Questions.csv',
+        answer_file='mmvp_prediction.jsonl',
+        image_folder='MMVP/',
         prompt_template=PROMPT_TEMPLATE.vicuna,
         tokenizer=tokenizer,
         image_processor=image_processor,
