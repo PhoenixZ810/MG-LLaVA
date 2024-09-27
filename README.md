@@ -23,6 +23,7 @@
 </div>
 
 ## 🎉 News
+- **\[2024/09\]** MG-LLaVA inference code released! Please refer to [Inference](#inference) for more details.
 - **\[2024/08\]** MG-LLaVA now supports the evalution of [MMVet](https://github.com/yuweihao/MM-Vet), [LLaVA-Bench-in-the-wild](https://github.com/haotian-liu/LLaVA/blob/main/docs/LLaVA_Bench.md), [MMVP](https://github.com/tsb0601/MMVP), and [MathVista](https://github.com/lupantech/MathVista) benchmarks!
 - **\[2024/06\]** Our [paper](https://arxiv.org/abs/2406.17770), [code](https://github.com/PhoenixZ810/MG-LLaVA) and [weights](https://huggingface.co/PhoenixZ/MG-LLaVA) are all released.
 
@@ -36,13 +37,13 @@ MG-LLaVA demonstrates exceptional perception skills.
 </div>
 
 ## 🔥 Main Results
-<div align="center">
+<!-- <div align="center">
   <img src="images/Main-results1.png" width="60%">
-</div>
+</div> -->
 
 
 <div align="center">
-  <img src="images/More_result.png" width="90%">
+  <img src="images/More_result.png" width="95%">
 </div>
 
 
@@ -133,8 +134,26 @@ If you want to train our model step by step, you can follow the instructions bel
   ```shell
   xtuner convert pth_to_hf CONFIG_NAME_OR_PATH CHECKPOINT SAVE_PATH
   ```
+<a id="inference"></a>
+### Inference
+Before inference, you need to download MG-LLaVA [checkpoints](https://huggingface.co/PhoenixZ/MG-LLaVA) and corresponding LLM model. In addition, [CLIP-Large-336](https://huggingface.co/openai/clip-vit-large-patch14-336), [CLIP-ConvNext-320-d](https://huggingface.co/laion/CLIP-convnext_large_d_320.laion2B-s29B-b131K-ft-soup), [RAM](https://huggingface.co/xinyu1205/recognize-anything-plus-model/blob/main/ram_plus_swin_large_14m.pth) and [OWL-VIT-2](https://huggingface.co/google/owlv2-large-patch14-ensemble) are also required.
 
 
+The code for inference is available at [chat.py](mg_llava/module/chat.py). You can use the following command to run the inference code in [chat.sh](script/chat.sh) and chat with MG-LLaVA.
+
+```
+srun -p mllm_1 \
+    --gres=gpu:1 \
+    python mg_llava/module/chat.py \
+    PATH TO MG-LLaVA-Vicuna-7B MODEL \
+    --llm_name_or_path 'PATH TO Vicuna1.5-7B LLM' \
+    --visual_encoder_clip 'PATH TO CLIP MODEL' \
+    --visual_encoder_convnext 'PATH TO ConvNext MODEL' \
+    --ram_model 'PATH TO RAM MODEL' \
+    --owl_vit_model 'PATH TO OWL-VIT-2 MODEL' \
+    --prompt-template 'vicuna' \
+    --image examples/example.jpg
+```
 ## Citation
 If you find MG-LLaVA useful, please cite using this BibTeX:
 ```bibtex

@@ -5,19 +5,25 @@ import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
 from torchvision.ops import roi_align
+import torchvision.transforms.functional as func
+from PIL import Image
 
 from .box_model import BoxLLaVAModel
 from mmengine.model import BaseModel
+from mmengine.logging import print_log
 from xtuner.model.utils import get_peft_model_state_dict, guess_load_checkpoint
 from xtuner.model.modules import ProjectorConfig, ProjectorModel
+from xtuner.dataset.utils import expand2square
 from fairscale.nn.checkpoint import checkpoint_wrapper
 from transformers import PreTrainedModel
 from typing import List, Optional
-from xtuner.utils import IGNORE_INDEX, IMAGE_TOKEN_INDEX
+from xtuner.utils import IGNORE_INDEX, IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN
 from xtuner.tools.utils import get_stop_criteria
 from transformers import  GenerationConfig
 VIDEO_TOKEN_INDEX = -201
 
+from mg_llava.dataset.utils import bbox_nms, adjust_short_resize_coordinates, adjust_center_crop_box, adjust_padding_boxes
+from collections import defaultdict
 
 class MultiFuseObjectLLaVAModel(BoxLLaVAModel):
 
@@ -266,11 +272,147 @@ class MultiFuseObjectLLaVAModel(BoxLLaVAModel):
         )
         default_generation_kwargs.update(metainfo.get('generation_kwargs', {}))
         self.gen_config = GenerationConfig(**default_generation_kwargs)
+        print_log(f'generation_config:\n{self.gen_config}', 'current')
 
         stop_words = []
         stop_words += self.template.get('STOP_WORDS', [])
         stop_criteria = get_stop_criteria(tokenizer=self.tokenizer, stop_words=stop_words)
         self.stop_criteria = stop_criteria
+
+    def chat_preprocess_multi_modal(self, image_file, box_data, padding=True):
+        data_dict = {}
+        image = Image.open(image_file).convert('RGB')
+        old_w, old_h = func.get_image_size(image)
+
+        boxes = box_data['boxes']
+        labels = box_data['labels']
+        scores = box_data['scores']
+        if padding:
+            image = expand2square(image, tuple(int(x * 255) for x in self.image_processor.image_mean))
+            # print(boxes)
+            boxes = adjust_padding_boxes(boxes, height=old_h, width=old_w)
+        old_w, old_h = func.get_image_size(image)
+
+        self.image_processor.crop_size['height'] = 768
+        self.image_processor.crop_size['width'] = 768
+        image_aux = self.image_processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+        new_h, new_w = image_aux.shape[-2:]
+        data_dict['pixel_values_aux'] = image_aux.unsqueeze(0).cuda()
+
+        image = image_aux.clone()
+        image = torch.nn.functional.interpolate(
+            image[None], size=[336,336], mode='bilinear', align_corners=False
+        )[0]
+        data_dict['pixel_values'] = image.unsqueeze(0).cuda()
+
+        # nms
+        boxes, labels, scores = bbox_nms(boxes, labels, scores)
+        boxes
+
+        num_per_category = 20
+        if len(scores) > 100:
+            object_text = []
+            label_indices = defaultdict(list)
+            for index, label in enumerate(labels):
+                label_indices[label].append(index)
+            label_indices = dict(label_indices)
+
+            for item in label_indices:
+                if len(label_indices[item]) > num_per_category:
+                    item_scores = scores[label_indices[item]]
+                    # item_boxes = boxes[label_indices[item]]
+                    top_scores, top_indices = item_scores.topk(num_per_category, largest=True)
+                    top_boxes_index = [label_indices[item][i] for i in top_indices.tolist()]
+                    label_indices[item] = top_boxes_index
+                    # top_boxes = item_boxes[top_indices]
+                    # label_indices[item] = top_boxes
+            boxes = [boxes[i] for item in label_indices for i in label_indices[item]]
+            try:
+                boxes = torch.stack(boxes)
+            except:
+                print(num_per_category)
+                print(boxes)
+                print(label_indices)
+                print(labels)
+                raise
+            labels = [labels[i] for item in label_indices for i in label_indices[item]]
+
+        # 坐标是原图尺度的，要映射到resize后的尺度
+        boxes, h1, w1 = adjust_short_resize_coordinates(boxes, old_h, old_w, 768)
+        boxes, labels = adjust_center_crop_box(boxes, labels, h1, w1, 768)
+
+        data_dict['gt_boxes'] = [boxes.cuda()]
+        data_dict['gt_labels'] = [labels]
+
+        return data_dict
+
+    def init_box_generator(self, ram_path, owl_path):
+        from mg_llava.module import box_generator
+        self.box_generator=box_generator(ram_path=ram_path, owl_path=owl_path)
+
+    def chat(
+        self,
+        prompt_text=None,
+        image=None,
+        processed_dict=None,
+        system='',
+        generation_cfg=None,
+        streamer=None,
+        stop_criteria=None,
+    ):
+        # single image and single text mode
+        instruction = self.template.get('INSTRUCTION', '{input}')
+        data = {}
+        if image is not None:
+            inputs = prompt_text
+            chunk_encode = []
+            for idx, chunk in enumerate(inputs.split(DEFAULT_IMAGE_TOKEN)):
+                if idx == 0:
+                    cur_encode = self.tokenizer.encode(chunk)
+                else:
+                    cur_encode = self.tokenizer.encode(chunk, add_special_tokens=False)
+                chunk_encode.append(cur_encode)
+            assert len(chunk_encode) == 2
+            input_ids = []
+            for idx, cur_chunk_encode in enumerate(chunk_encode):
+                input_ids.extend(cur_chunk_encode)
+                if idx != len(chunk_encode) - 1:
+                    input_ids.append(IMAGE_TOKEN_INDEX)
+            input_ids = torch.tensor(input_ids).to(self.visual_encoder.device)
+            data['input_ids'] = input_ids.unsqueeze(0)
+            if processed_dict is None:
+                box_data = self.box_generator(image)
+                processed_dict = self.chat_preprocess_multi_modal(image, box_data)
+            data.update(processed_dict)
+
+        else:
+            inputs = prompt_text
+            input_ids = torch.tensor(self.tokenizer.encode(inputs, return_tensors='pt')).to(self.visual_encoder.device)
+            data['input_ids'] = input_ids.unsqueeze(0)
+
+        mm_inputs = self._prepare_data_for_llm(data)
+        gen_config = generation_cfg if generation_cfg is not None else self.gen_config
+        stopping_criteria = stop_criteria if stop_criteria is not None else self.stop_criteria
+        generate_output = self.llm.generate(
+            **mm_inputs,
+            generation_config=gen_config,
+            streamer=streamer,
+            bos_token_id=self.tokenizer.bos_token_id,
+            stopping_criteria=stopping_criteria,
+        )
+        if streamer is None:
+            if image is not None:
+                output_text = self.tokenizer.decode(generate_output[0])
+            else:
+                output_text = self.tokenizer.decode(generate_output[0][len(mm_inputs['input_ids'][0]) :])
+            end = '' if output_text[-1] == '\n' else '\n'
+            print(output_text, end=end)
+        if image is not None:
+            inputs += self.tokenizer.decode(generate_output[0], skip_special_tokens=True).strip()
+        else:
+            inputs = self.tokenizer.decode(generate_output[0], skip_special_tokens=True).strip()
+
+        return inputs, generate_output
 
 def prepare_inputs_labels_for_multimodal(
     llm: PreTrainedModel,
